@@ -14,11 +14,16 @@ class ANTS_Policy_version(sal.plugin.Widget):
         context['data'] = (
             InventoryItem.objects
             .filter(machine__in=queryset, conditions__condition_name="ants_policy_version")
+            .values("version")
+            .annotate(count=Count("version"))
+            .order_by("version")
         )
+        return context
     
 
     def filter(self, machines, data):
         machines = machines.filter(
             conditions__condition_name="ants_policy_version", 
-            
+            conditions__version = data
         )
+        return machines, "Machines with version {} of ants policy".format(data)
